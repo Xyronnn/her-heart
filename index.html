@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08030a">
+  <meta name="description" content="A little heart made of love, in many languages.">
+  <title>A Little Love for You ❤️</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #08030a;
+      --pink: #ff6b91;
+      --soft: #ffd0dc;
+      --muted: #d6a9b7;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      overflow-x: hidden;
+      color: #fff2f6;
+      background:
+        radial-gradient(ellipse at 50% 42%, rgba(117, 8, 43, .24), transparent 54%),
+        radial-gradient(ellipse at 50% 100%, rgba(65, 8, 42, .24), transparent 50%),
+        var(--bg);
+      font-family: Georgia, "Times New Roman", serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .stars, .hearts {
+      position: fixed; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .stars { z-index: 0; }
+    .star {
+      position: absolute; width: 2px; height: 2px; border-radius: 50%;
+      background: #ffd9e4; opacity: .2; animation: twinkle 3s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle { to { opacity: .9; transform: scale(1.8); } }
+    .hearts { z-index: 1; }
+    .float-heart {
+      position: absolute; bottom: -30px; color: #ff4f80;
+      opacity: 0; animation: float-up linear forwards;
+      filter: drop-shadow(0 0 8px rgba(255, 55, 110, .6));
+    }
+    @keyframes float-up {
+      10% { opacity: .7; }
+      85% { opacity: .45; }
+      100% { transform: translateY(-110vh) rotate(25deg); opacity: 0; }
+    }
+    main {
+      position: relative; z-index: 2; width: min(100%, 760px);
+      padding: max(28px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .eyebrow {
+      color: #ff9db8; letter-spacing: .22em; text-transform: uppercase;
+      font: 600 10px/1.6 system-ui, sans-serif; margin: 3px 0 10px;
+    }
+    h1 {
+      font-size: clamp(29px, 7vw, 46px); font-weight: 400;
+      line-height: 1.12; margin: 0; text-shadow: 0 0 22px rgba(255, 73, 126, .35);
+    }
+    .subtitle {
+      margin: 12px 0 0; max-width: 33ch; color: var(--muted);
+      font: 14px/1.6 system-ui, sans-serif;
+    }
+    .heart-wrap {
+      width: 100%; max-width: 610px; margin: 4px auto 0;
+      position: relative; aspect-ratio: 1 / 1;
+      display: grid; place-items: center;
+    }
+    canvas { display: block; width: 100%; height: 100%; overflow: visible; }
+    .heart-aura {
+      position: absolute; width: 62%; height: 62%; border-radius: 50%;
+      background: rgba(220, 15, 67, .11); filter: blur(38px);
+      animation: breathe 3.4s ease-in-out infinite; pointer-events: none;
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(.86); opacity: .45; }
+      50% { transform: scale(1.12); opacity: .9; }
+    }
+    .message {
+      margin: -12px 0 0; font-size: clamp(28px, 7vw, 42px);
+      line-height: 1.25; color: #ffd9e4; opacity: 0;
+      transform: translateY(10px) scale(.97);
+      text-shadow: 0 0 12px rgba(255, 81, 132, .85), 0 0 34px rgba(255, 30, 94, .35);
+      transition: opacity 1.2s ease, transform 1.2s ease;
+    }
+    .message.visible { opacity: 1; transform: translateY(0) scale(1); }
+    .note {
+      margin: 12px 0 18px; max-width: 34ch; color: #d9b6c1;
+      font: 13px/1.65 system-ui, sans-serif;
+    }
+    button {
+      appearance: none; border: 1px solid rgba(255, 144, 176, .65);
+      color: #fff4f7; background: linear-gradient(135deg, #a50e40, #6d0a35);
+      padding: 13px 22px; min-height: 46px; border-radius: 999px;
+      font: 600 14px system-ui, sans-serif; letter-spacing: .02em;
+      box-shadow: 0 0 24px rgba(224, 24, 83, .24);
+      cursor: pointer; transition: transform .2s ease, box-shadow .2s ease;
+    }
+    button:hover { box-shadow: 0 0 30px rgba(255, 54, 111, .45); }
+    button:active { transform: scale(.97); }
+    button:focus-visible { outline: 2px solid #ffd0dc; outline-offset: 4px; }
+    footer { color: #896876; font: 11px/1.5 system-ui, sans-serif; margin-top: 23px; }
+    @media (max-width: 420px) {
+      main { padding-left: 10px; padding-right: 10px; }
+      .heart-wrap { margin-top: 8px; }
+      .message { margin-top: -7px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+      .message { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars" aria-hidden="true"></div>
+  <div class="hearts" id="hearts" aria-hidden="true"></div>
+
+  <main>
+    <p class="eyebrow">A little something from my heart</p>
+    <h1>For someone special</h1>
+    <p class="subtitle">Different languages. One feeling. A heart full of love.</p>
+
+    <div class="heart-wrap" aria-label="A heart formed from love phrases in many languages">
+      <div class="heart-aura" aria-hidden="true"></div>
+      <canvas id="heartCanvas" role="img" aria-label="An animated red heart made of I love you in many languages"></canvas>
+    </div>
+
+    <p class="message" id="message">I love you ❤️</p>
+    <p class="note">No matter what language the world speaks, some feelings need no translation.</p>
+    <button id="replay" type="button">Make the heart bloom again ♥</button>
+    <footer>Made with love, just for you.</footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+      const canvas = document.getElementById("heartCanvas");
+      const ctx = canvas.getContext("2d");
+      const message = document.getElementById("message");
+      const replay = document.getElementById("replay");
+      const stars = document.getElementById("stars");
+      const floatingHearts = document.getElementById("hearts");
+
+      const phrases = [
+        "I love you", "Seni seviyorum", "Te amo", "Je t'aime",
+        "Ich liebe dich", "Ti amo", "Eu te amo", "Я тебя люблю",
+        "사랑해", "愛してる", "我爱你", "मैं तुमसे प्यार करता हूँ",
+        "Σ' αγαπώ", "Ik hou van jou", "Jag älskar dig", "Kocham cię",
+        "ฉันรักเธอ", "Anh yêu em", "Aku cinta kamu", "Я тебе кохаю"
+      ];
+      const colors = ["#ff315f", "#ff426d", "#ff597d", "#ff7895", "#ff9db4"];
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let width = 0, height = 0, dpr = 1, points = [], startTime = 0, raf = 0;
+      let seed = 11;
+
+      function random() {
+        seed = (seed * 1664525 + 1013904223) >>> 0;
+        return seed / 4294967296;
+      }
+      function shuffle(array) {
+        const copy = array.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+      function heartPoint(a) {
+        return {
+          x: 16 * Math.pow(Math.sin(a), 3),
+          y: 13 * Math.cos(a) - 5 * Math.cos(2*a) - 2 * Math.cos(3*a) - Math.cos(4*a)
+        };
+      }
+      function heartInside(x, y) {
+        // Point-in-polygon test against a sampled mathematical heart outline.
+        let inside = false;
+        for (let i = 0, j = outline.length - 1; i < outline.length; j = i++) {
+          const a = outline[i], b = outline[j];
+          const cross = ((a.y > y) !== (b.y > y)) &&
+            (x < (b.x - a.x) * (y - a.y) / ((b.y - a.y) || 0.00001) + a.x);
+          if (cross) inside = !inside;
+        }
+        return inside;
+      }
+      const outline = Array.from({length: 500}, (_, i) => heartPoint(i * Math.PI * 2 / 500));
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = Math.max(1, rect.width);
+        height = Math.max(1, rect.height);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        makePoints();
+        drawStatic();
+      }
+      function makePoints() {
+        points = [];
+        const scale = Math.min(width / 37, height / 37) * 0.91;
+        const centerX = width / 2;
+        const centerY = height / 2 + scale * 0.02;
+        const top = -17.0, bottom = 14.0;
+        const lineStep = Math.max(1.0, 1.45 / Math.max(0.75, scale / 12));
+        const shuffledPhrases = shuffle(phrases);
+        let phraseIndex = 0;
+        for (let y = top; y <= bottom; y += lineStep) {
+          const intersections = [];
+          for (let i = 0; i < outline.length; i++) {
+            const a = outline[i], b = outline[(i + 1) % outline.length];
+            if ((a.y <= y && b.y > y) || (b.y <= y && a.y > y)) {
+              intersections.push(a.x + (y - a.y) * (b.x - a.x) / (b.y - a.y));
+            }
+          }
+          intersections.sort((a, b) => a - b);
+          for (let i = 0; i + 1 < intersections.length; i += 2) {
+            const left = intersections[i] + 0.45;
+            const right = intersections[i + 1] - 0.45;
+            if (right - left < 1.5) continue;
+            const rowItems = [];
+            let x = left;
+            let guard = 0;
+            while (x < right && guard++ < 100) {
+              const text = shuffledPhrases[phraseIndex++ % shuffledPhrases.length];
+              const fontSize = 0.72 + random() * 0.22;
+              // Width estimate keeps phrases from overlapping on small screens.
+              const estimated = text.length * fontSize * 0.47 + 0.7;
+              if (x + estimated <= right) {
+                rowItems.push({
+                  x: x + estimated / 2, y, text, fontSize,
+                  color: colors[Math.floor(random() * colors.length)],
+                  delay: random() * 0.25,
+                  phase: random() * Math.PI * 2
+                });
+                x += estimated + 0.3;
+              } else {
+                break;
+              }
+            }
+            rowItems.forEach(p => {
+              p.px = centerX + p.x * scale;
+              p.py = centerY - p.y * scale;
+              p.size = Math.max(6.2, Math.min(11.5, p.fontSize * scale * 0.55));
+              points.push(p);
+            });
+          }
+        }
+        // Sort from the outside inward for a pleasing reveal.
+        points.sort((a, b) => {
+          const da = Math.hypot((a.px - centerX) / width, (a.py - centerY) / height);
+          const db = Math.hypot((b.px - centerX) / width, (b.py - centerY) / height);
+          return db - da;
+        });
+        points.forEach((p, i) => p.order = i / Math.max(1, points.length - 1));
+      }
+      function drawStatic() {
+        ctx.clearRect(0, 0, width, height);
+      }
+      function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+      function frame(now) {
+        const elapsed = (now - startTime) / 1000;
+        ctx.clearRect(0, 0, width, height);
+        const totalReveal = reducedMotion ? 1 : Math.min(1, elapsed / 5.8);
+        for (const p of points) {
+          const local = reducedMotion ? 1 : Math.max(0, Math.min(1, (totalReveal - p.order * 0.88) / 0.12));
+          if (local <= 0) continue;
+          const reveal = easeOut(local);
+          const pulse = reducedMotion ? 0 : (Math.sin(now / 650 + p.phase) + 1) * 0.5;
+          const alpha = 0.5 + reveal * 0.5;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.font = `700 ${p.size}px Arial, "Noto Sans", "Noto Sans CJK KR", sans-serif`;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 3 + pulse * 7;
+          ctx.fillStyle = p.color;
+          const lift = reducedMotion ? 0 : (1 - reveal) * 13;
+          ctx.fillText(p.text, p.px, p.py + lift);
+          ctx.restore();
+        }
+        if (totalReveal >= 1) message.classList.add("visible");
+        else message.classList.remove("visible");
+        if (totalReveal < 1 || !reducedMotion) raf = requestAnimationFrame(frame);
+      }
+      function restart() {
+        cancelAnimationFrame(raf);
+        seed = 11;
+        message.classList.remove("visible");
+        startTime = performance.now();
+        raf = requestAnimationFrame(frame);
+      }
+      function makeStars() {
+        stars.replaceChildren();
+        const count = Math.min(75, Math.floor(window.innerWidth / 5));
+        for (let i = 0; i < count; i++) {
+          const star = document.createElement("span");
+          star.className = "star";
+          star.style.left = `${random() * 100}%`;
+          star.style.top = `${random() * 100}%`;
+          star.style.animationDelay = `${random() * 3}s`;
+          star.style.animationDuration = `${2 + random() * 3}s`;
+          stars.appendChild(star);
+        }
+      }
+      function floatHeart() {
+        if (document.hidden || reducedMotion) return;
+        const heart = document.createElement("span");
+        heart.className = "float-heart";
+        heart.textContent = random() > .5 ? "♥" : "♡";
+        heart.style.left = `${random() * 100}%`;
+        heart.style.fontSize = `${12 + random() * 18}px`;
+        heart.style.animationDuration = `${7 + random() * 7}s`;
+        floatingHearts.appendChild(heart);
+        heart.addEventListener("animationend", () => heart.remove(), {once: true});
+      }
+
+      replay.addEventListener("click", () => {
+        restart();
+        for (let i = 0; i < 8; i++) setTimeout(floatHeart, i * 130);
+      });
+      window.addEventListener("resize", () => {
+        resize();
+        restart();
+      });
+      makeStars();
+      resize();
+      restart();
+      if (!reducedMotion) {
+        setInterval(floatHeart, 950);
+      } else {
+        message.classList.add("visible");
+      }
+    })();
+  </script>
+</body>
+</html>
