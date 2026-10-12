@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#060208"><title>Love Heart</title>
+<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#060208}body{display:grid;place-items:center}canvas{width:min(100vw,100vh);height:min(100vw,100vh);display:block}</style>
+</head><body><canvas id="c" aria-label="Animated heart made from love phrases in 20 languages"></canvas>
+<script>
+(()=> {
+const phrases=["I love you","Seni seviyorum","Te amo","Je t'aime","Ich liebe dich","Ti amo","Eu te amo","Я тебя люблю","사랑해","愛してる","我爱你","मैं तुमसे प्यार करता हूँ","Σ' αγαπώ","Ik hou van jou","Jag älskar dig","Kocham cię","ฉันรักเธอ","Anh yêu em","Aku cinta kamu","Я тебе кохаю"];
+const cv=document.querySelector("#c"),ctx=cv.getContext("2d"),BG="#060208",bg=[6/255,2/255,8/255],flash=[1,.78,.78];
+let seed=11;function rand(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
+function choice(a){return a[Math.floor(rand()*a.length)]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(rand()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function mix(a,b,k){return a.map((v,i)=>v+(b[i]-v)*k)}
+function hx(c){return "#"+c.map(v=>Math.round(Math.max(0,Math.min(1,v))*255).toString(16).padStart(2,"0")).join("")}
+function heart(a){return {x:16*Math.sin(a)**3*21,y:(13*Math.cos(a)-5*Math.cos(2*a)-2*Math.cos(3*a)-Math.cos(4*a))*21+20}}
+let W=800,H=800,dpr=1,items=[],started=0,raf=0,shimmerAt=0;
+function build(){
+const poly=Array.from({length:720},(_,i)=>heart(2*Math.PI*i/720)),edges=poly.map((p,i)=>[p,poly[(i+1)%poly.length]]);
+const ys=poly.map(p=>p.y),ymax=Math.max(...ys),ymin=Math.min(...ys),cy=(ymax+ymin)/2;
+function spans(y){let xs=[];for(const [[x1,y1],[x2,y2]] of edges)if((y1<=y&&y<y2)||(y2<=y&&y<y1))xs.push(x1+(y-y1)*(x2-x1)/(y2-y1));xs.sort((a,b)=>a-b);let a=[];for(let i=0;i<xs.length;i+=2)a.push([xs[i],xs[i+1]]);return a}
+function intersect(A,B){let o=[];for(let a of A)for(let b of B){let lo=Math.max(a[0],b[0]),hi=Math.min(a[1],b[1]);if(hi-lo>14)o.push([lo,hi])}return o}
+const sizes=[9,10,11,12],measure=(txt,size)=>{ctx.font=`bold ${size}px Arial`;return ctx.measureText(txt).width};
+function* cycle(){while(true){let a=phrases.slice();shuffle(a);yield* a}}
+let it=cycle(),rowH=19,half=rowH/2,placed=[];
+for(let y=ymax-half;y>ymin+half;y-=rowH){
+for(let [lo0,hi0] of intersect(spans(y+half),spans(y-half))){
+let lo=lo0+4,hi=hi0-4,cur=lo+rand()*8,line=[];
+while(true){let fit=null;for(let n=0;n<10;n++){let text=it.next().value,size=choice(sizes),w=measure(text,size);if(cur+w<=hi){fit={text,size,w};break}}if(!fit)break;line.push({x:cur+fit.w/2,y,text:fit.text,size:fit.size,w:fit.w});cur+=fit.w+7}
+if(!line.length)continue;
+if(line.length>1){let left=hi-(line.at(-1).x+line.at(-1).w/2);line.forEach((p,i)=>p.x+=left*i/(line.length-1))}else line[0].x=(lo+hi)/2;
+line.forEach((p,i)=>placed.push({...p,edge:i===0||i===line.length-1}))
+}}
+const wine=[.58,0,.09],crimson=[.9,.05,.14],blood=[.98,.1,.16];
+for(let p of placed){p.rad=Math.min(1,Math.hypot(p.x/(16*21),(p.y-cy)/(14.5*21)));let c=mix(wine,crimson,.25+.75*p.rad);p.color=mix(c,blood,rand()*.35+(p.edge?.3:0)).map(v=>Math.min(1,v))}
+let outer=placed.filter(p=>p.edge),inner=placed.filter(p=>!p.edge);
+outer.sort((a,b)=>(Math.atan2(a.x,a.y-cy)%(2*Math.PI))-(Math.atan2(b.x,b.y-cy)%(2*Math.PI)));
+inner.sort((a,b)=>b.rad-a.rad+(rand()-.5)*.08);items=outer.concat(inner);
+const scale=Math.min(W/800,H/800);
+for(let p of items){p.x=W/2+(p.x-400)*scale;p.y=H/2+(-p.y-400)*scale;p.size*=scale;p.dx=(rand()*20-10)*scale;p.f=0;p.done=false;p.started=false}
+}
+function resize(){let size=Math.min(innerWidth,innerHeight);dpr=Math.min(devicePixelRatio||1,2);W=H=size;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);build();started=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame)}
+function frame(now){ctx.clearRect(0,0,W,H);let count=Math.min(items.length,Math.floor(items.length*(now-started)/10000));
+for(let i=0;i<count;i++)items[i].started=true;
+for(let p of items){if(!p.started)continue;p.f=Math.min(42,p.f+1);let u=p.f/42,e=1-(1-u)**3,c=p.color,x=p.x+p.dx*(1-e),y=p.y-(1-e)*34;
+ctx.textAlign="center";ctx.textBaseline="middle";ctx.font=`bold ${p.size}px Arial`;
+ctx.fillStyle=hx(mix(bg,c.map(v=>v*.3),e));ctx.fillText(p.text,x+2,y+3);
+ctx.font=`bold ${p.size+1}px Arial`;ctx.fillStyle=hx(mix(bg,c.map(v=>v*.2),e*e));ctx.fillText(p.text,x,y);
+let f=.75*Math.sin(Math.PI*Math.max(0,Math.min(1,(u-.55)/.45)));ctx.font=`bold ${p.size}px Arial`;ctx.fillStyle=hx(mix(mix(bg,c,e**1.5),flash,f));ctx.fillText(p.text,x,y);
+if(u>=1)p.done=true}
+if(count===items.length&&items.every(p=>p.done)){if(now>shimmerAt){shimmerAt=now+140;let p=choice(items);ctx.font=`bold ${p.size}px Arial`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=hx(mix(p.color,flash,.6));ctx.fillText(p.text,p.x,p.y)}}
+raf=requestAnimationFrame(frame)}
+addEventListener("resize",resize,{passive:true});resize();
+})();
+</script></body></html>
